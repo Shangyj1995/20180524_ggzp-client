@@ -26,7 +26,7 @@ export default class HeaderSelector extends Component {
     for (var i = 0; i < 20; i++) {
       headerList.push({
         //必须用require()动态加载一个图片模板
-        icon: require('./images/头像' + (i + 1) + '.png'),
+        icon: require('../../assets/images/头像' + (i + 1) + '.png'),
         text: '头像' + (i + 1)
       })
 

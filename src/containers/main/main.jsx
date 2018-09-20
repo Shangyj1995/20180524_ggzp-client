@@ -11,6 +11,8 @@ import Message from '../message/message'
 import Personal from '../personal/personal'
 
 import {connect} from 'react-redux'
+import {getUser} from '../../redux/actions'
+import {getRedirectPath} from "../../utils"
 
 import NavFooter from '../../components/nav-footer/nav-footer'
 
@@ -49,16 +51,39 @@ class Main extends Component {
       text: '个人',
     }
   ]
+  componentDidMount(){
+    //发ajax请求获取user信息
+    //得到cookie中的userid
+    const userid=Cookies.get('userid')
+    //redux中的user对象没有_id
+    const {_id}=this.props.user
+    if(userid&&!_id){
+      this.props.getUser()
+    }
+  }
 
   render() {
-    //判断用户是否登录（cookie中是否有userid），如果没有，自动跳转到登录页面
+    //1.判断用户是否登录（cookie中是否有userid），如果没有，自动跳转到登录页面
     const userid = Cookies.get('userid')
     if (!userid) {
       return <Redirect to='/login'/>
     }
-    const navList = this.navList
+    // 2.cookie中有userid（登录过的），看redux中的user有没有信息，如果没有（还没有登录），发异步请求获取user信息并保存到redux
+    const {user} = this.props
+    if(!user._id){
+      //不能render()中发ajax请求
+      //显示一个提示正在请求的界面
+      return <div>LOADING...</div>
+    }
+
+    // 3.如果redux的user中已经有信息（已经登录），如果请求的是应用的根路径，自动跳转到对应的主页面
     //当前请求的path
     const path = this.props.location.pathname
+    if(path==='/'){
+      return <Redirect to={getRedirectPath(user.type,user.header)}/>
+    }
+    const navList = this.navList
+
     //得到当前nav对象
     const currentNav = navList.find(nav => path === nav.path)
     //动态确定哪个nav需要隐藏
@@ -89,5 +114,12 @@ class Main extends Component {
 
 export default connect(
   state => ({user: state.user}),
-  {}
+  {getUser }
 )(Main)
+
+/*
+* 1.判断cookie中是否有userid，如果没有，自动跳转到登录页面
+* 2.cookie中有userid（登录过的），看redux中的user有没有信息，如果没有（还没有登录），发异步请求获取user信息并保存到redux
+* 3.如果redux的user中已经有信息（已经登录），如果请求的是应用的根路径，自动跳转到对应的主页面
+*
+* */

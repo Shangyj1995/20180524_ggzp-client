@@ -3,13 +3,15 @@
 reducer函数: 根据老的state和指定的action 生产新的state
  */
 import {combineReducers} from 'redux'
+
 import {getRedirectPath} from '../utils'
 
 import {
   AUTH_SUCCESS,
   ERROR_MSG,
   RECEIVE_USER,
-  RESET_USER
+  RESET_USER,
+  RECEIVE_USER_LIST
 } from './action-types'
 //管理user数据
 const initUser = {
@@ -17,7 +19,6 @@ const initUser = {
   type: '',//用户类型
   msg: '',// 需要显示的错误信息
   redirectTo: '', // 需要自动重定向的路径
-}
 
 function user(state = initUser, action) {
   switch (action.type) {
@@ -36,8 +37,20 @@ function user(state = initUser, action) {
   }
 }
 
+//管理userList数据
+const initUserList=[]
+function userList(state=initUserList,action) {
+  switch (action.type){
+    case RECEIVE_USER_LIST:
+      return action.data
+    default:
+      return state
+  }
+}
+
 export default combineReducers({
-  user
+  user,
+  userList
 })
 
 /*
